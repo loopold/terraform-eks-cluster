@@ -15,10 +15,53 @@ provider "aws" {
 data "aws_availability_zones" "available" {}
 
 locals {
-  cluster_name = "education-eks-${random_string.suffix.result}"
+  cluster_name = "education-eks"
+  # cluster_name = "education-eks-${random_string.suffix.result}"
 }
 
 resource "random_string" "suffix" {
   length  = 8
   special = false
+}
+
+data "aws_route53_zone" "this" {
+  name         = var.external_domain
+  private_zone = false
+}
+
+resource "aws_route53_zone" "this" {
+  name  = var.external_domain
+}
+
+# resource "aws_acm_certificate" "wild" {
+#   domain_name               = "*.${var.external_domain}"
+#   validation_method         = "DNS"
+
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+
+#   tags = {
+#     Terraform   = "true"
+#   }
+# }
+
+module "acm" {
+  source  = "terraform-aws-modules/acm/aws"
+  version = "4.0.1"
+
+  domain_name = var.external_domain
+  zone_id     = coalescelist(data.aws_route53_zone.this.*.zone_id, aws_route53_zone.this.*.zone_id)[0]
+
+  subject_alternative_names = [
+    "*.${var.external_domain}",
+    "alerts.${var.external_domain}",
+  ]
+
+  wait_for_validation = true
+
+  tags = {
+    Name = var.external_domain
+    Terraform   = "true"
+  }
 }
