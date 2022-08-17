@@ -29,10 +29,6 @@ data "aws_route53_zone" "this" {
   private_zone = false
 }
 
-resource "aws_route53_zone" "this" {
-  name  = var.external_domain
-}
-
 # resource "aws_acm_certificate" "wild" {
 #   domain_name               = "*.${var.external_domain}"
 #   validation_method         = "DNS"
@@ -51,7 +47,7 @@ module "acm" {
   version = "4.0.1"
 
   domain_name = var.external_domain
-  zone_id     = coalescelist(data.aws_route53_zone.this.*.zone_id, aws_route53_zone.this.*.zone_id)[0]
+  zone_id     = coalescelist(data.aws_route53_zone.this.*.zone_id)[0]
 
   subject_alternative_names = [
     "*.${var.external_domain}",
