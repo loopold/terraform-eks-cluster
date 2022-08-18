@@ -110,7 +110,7 @@ kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/relea
 
 If you do not use `eksctl`, you need to ensure worker nodes security group permit access to TCP port 9443 from the kubernetes control plane for the webhook access. 
 
-Edit inbound rules in sg: `education-eks-node` and add port 9443 for `education-eks-cluster`
+Edit inbound rules in sg: `education-eks-node` and add port 9443 for `education-eks-cluster` and outbound rules in the same sg - add port 80 to the world (`0/0`).
 
 Set a version. Latest release is [here][6]:
 ```sh
