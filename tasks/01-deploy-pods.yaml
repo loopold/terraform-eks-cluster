@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodeinfo-deploy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nodeinfo
+  template:
+    metadata:
+      labels:
+        app: nodeinfo
+    spec:
+      containers:
+      - image: ajafo/nodeinfo:2.0.2
+        args:
+        - /bin/sh
+        - -c
+        - touch /tmp/healthy
+        name: hello-nodeinfo
+        ports:
+        - containerPort: 80
+        env:
+        - name: VERSION
+          value: "2.0.2"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /tmp/healthy
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          initialDelaySeconds: 2
+          periodSeconds: 5
+          httpGet:
+            path: /
+            port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodeinfo-service
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: nodeinfo
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nodeinfo-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb    
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    # alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/target-type: 'ip'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+spec:
+  tls:
+  - hosts:
+    - nodeinfo.k8s.test.devopsvelocity.com
+  rules:
+  - host: nodeinfo.k8s.test.devopsvelocity.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nodeinfo-service
+            port:
+              number: 80
