@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-stress-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: httpd-stress
+  template:
+    metadata:
+      labels:
+        run: httpd-stress
+    spec:
+      containers:
+      - name: hello-httpd-stress
+        image: ajafo/httpd-stress
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            memory: 128Mi
+            cpu: 250m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpd-stress-service
+  labels:
+    run: httpd-stress
+spec:
+  ports:
+    - port: 80
+  selector:
+    run: httpd-stress
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: httpd-stress-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb    
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    # alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/target-type: 'ip'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+spec:
+  tls:
+  - hosts:
+    - httpd-stress.k8s.test.devopsvelocity.com
+  rules:
+  - host: httpd-stress.k8s.test.devopsvelocity.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: httpd-stress-service
+            port:
+              number: 80
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: httpd-stress
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: httpd-stress-deploy
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 50
