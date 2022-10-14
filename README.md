@@ -114,7 +114,7 @@ Edit inbound rules in sg: `education-eks-node` and add port 9443 for `education-
 
 Set a version. Latest release is [here][6]:
 ```sh
-export ALBCTRLVER="v2.4.3"
+export ALBCTRLVER="v2.4.4"
 ```
 
 ### Check metadata server version 2 (IMDSv2)
@@ -162,7 +162,7 @@ kubectl get sa -A | grep balancer
 kubectl describe sa aws-load-balancer-controller -n kube-system
 ```
 
-Attach policy to the role (do we need create a new one?)
+Attach policy to the role (do we need create a new one?) - creation of `$NODE_ROLE_NAME` is described [above](#iam-policy).
 ```sh
 export LB_POLICY_ARN=arn:aws:iam::$AWS_ACCOUNT_ID:policy/AWSLoadBalancerControllerIAMPolicy
 aws iam attach-role-policy --role-name $NODE_ROLE_NAME --policy-arn $LB_POLICY_ARN
