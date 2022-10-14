@@ -13,34 +13,35 @@ spec:
         app: nodeinfo
     spec:
       containers:
-      - image: ajafo/nodeinfo:2.0.2
-        args:
-        - /bin/sh
-        - -c
-        - touch /tmp/healthy
-        name: hello-nodeinfo
-        ports:
-        - containerPort: 80
+      - name: hello-nodeinfo
+        image: ajafo/nodeinfo:2.0.2
         env:
         - name: VERSION
           value: "2.0.2"
+        # command: ["/bin/sh", "-c", "touch /tmp/healthy"]
+        args: 
+        - /bin/sh
+        - -c
+        - touch /tmp/healthy; apache2-foreground
+        ports:
+        - containerPort: 80
         resources:
           limits:
             memory: "128Mi"
             cpu: "250m"
-        readinessProbe:
-          exec:
-            command:
-            - cat
-            - /tmp/healthy
-          initialDelaySeconds: 5
-          periodSeconds: 5
-        livenessProbe:
-          initialDelaySeconds: 2
-          periodSeconds: 5
-          httpGet:
-            path: /
-            port: 80
+        # readinessProbe:
+        #   exec:
+        #     command:
+        #     - cat
+        #     - /tmp/healthy
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 5
+        # livenessProbe:
+        #   initialDelaySeconds: 2
+        #   periodSeconds: 5
+        #   httpGet:
+        #     path: /
+        #     port: 80
 ---
 apiVersion: v1
 kind: Service
@@ -58,17 +59,17 @@ kind: Ingress
 metadata:
   name: nodeinfo-ingress
   annotations:
-    kubernetes.io/ingress.class: alb    
+    kubernetes.io/ingress.class: nginx    
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
     # alb.ingress.kubernetes.io/ssl-redirect: '443'
-    alb.ingress.kubernetes.io/target-type: 'ip'
-    alb.ingress.kubernetes.io/scheme: internet-facing
+    # alb.ingress.kubernetes.io/target-type: 'ip'
+    # alb.ingress.kubernetes.io/scheme: internet-facing
 spec:
-  tls:
-  - hosts:
-    - nodeinfo.k8s.test.devopsvelocity.com
+  # tls:
+  # - hosts:
+  #   - nodeinfo.k8s.test.devopsvelocity.com
   rules:
-  - host: nodeinfo.k8s.test.devopsvelocity.com
+  - host: localhost
     http:
       paths:
       - path: /
