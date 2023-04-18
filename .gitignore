@@ -29,3 +29,6 @@ terraform.rc
 
 # Ignore temporary tasks folder
 tasks
+
+# Local notes and test scripts
+*notes.md
