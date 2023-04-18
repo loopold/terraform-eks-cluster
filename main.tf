@@ -17,6 +17,7 @@ data "aws_availability_zones" "available" {}
 locals {
   cluster_name = "education-eks"
   # cluster_name = "education-eks-${random_string.suffix.result}"
+  main_region = (var.environment == "prod") || (var.environment == "stg") || (var.environment == "dev") ? 0 : 1
 }
 
 resource "random_string" "suffix" {

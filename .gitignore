@@ -5,6 +5,7 @@
 *.tfstate
 *.tfstate.*
 *.tfplan
+tfplan
 
 # Crash log files
 crash.log
@@ -25,3 +26,6 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Ignore temporary tasks folder
+tasks

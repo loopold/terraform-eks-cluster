@@ -8,3 +8,8 @@ variable "external_domain" {
   description = "Domain for the account"
   default     = "k8s.test.devopsvelocity.com"
 }
+
+variable "environment" {
+  description = "High-level tag for all resources"
+  default     = "stg"
+}
