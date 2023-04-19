@@ -50,10 +50,10 @@ resource "aws_db_instance" "education" {
   parameter_group_name = aws_db_parameter_group.education[0].name
   publicly_accessible  = false
   skip_final_snapshot  = true
+  apply_immediately    = true
 
   vpc_security_group_ids = [
-    aws_security_group.db_instance[0].id,
-    module.eks.node_security_group_id
+    aws_security_group.db_instance[0].id
   ]
 
   tags = {
