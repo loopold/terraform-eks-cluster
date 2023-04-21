@@ -41,3 +41,26 @@ output "oidc_provider_arn" {
 output "main_region" {
   value = local.main_region
 }
+
+output "db_version" {
+  description = "RDS instance version"
+  value       = var.create_rds ? aws_db_instance.education[0].engine_version : null
+}
+
+output "db_hostname" {
+  description = "RDS instance hostname"
+  value       = var.create_rds ? aws_db_instance.education[0].address : null
+  sensitive   = true
+}
+
+output "db_port" {
+  description = "RDS instance port"
+  value       = var.create_rds ? aws_db_instance.education[0].port : null
+  sensitive   = true
+}
+
+output "db_username" {
+  description = "RDS instance root username"
+  value       = var.create_rds ? aws_db_instance.education[0].username : null
+  sensitive   = true
+}

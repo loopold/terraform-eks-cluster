@@ -25,6 +25,39 @@ export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text --query Accoun
 
 ---
 
+## RDS
+
+Follow the steps below if you need an external database for your EKS cluster.
+
+```sh
+export TF_VAR_create_rds=true
+export TF_VAR_db_password=$(python -c "import secrets; print(secrets.token_urlsafe(32))")
+
+# now do the terraform cycle
+```
+
+Create a temporary set of credentials for your application. Consider to use variable names for default connection parameter values. (`PGPASSWORD`, `PGUSER`, `PGHOST`, `PGPORT`). See the [link][8].
+```sh
+cat << EOF > ~/tmp/env_file
+POSTGRES_PASSWORD=$(echo $TF_VAR_db_password)
+POSTGRES_USER=$(terraform output -raw db_username)
+POSTGRES_HOST=$(terraform output -raw db_hostname)
+POSTGRES_PORT=$(terraform output -raw db_port)
+EOF
+```
+
+List of resources created for the database
+```sh
+terraform state list | grep "db_" | sed 's/\[.*//'
+```
+
+Find a way to delete `db_` resources... Use the rds module.
+```sh
+terraform plan -destroy -target=aws_db_instance.education
+```
+
+---
+
 ## IAM Policy
 
 ```sh
@@ -240,3 +273,4 @@ until you manually delete created Load Balancers and extra Security Groups (`k8s
 [5]: https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md#get-role-name-with-other-configurations
 [6]: https://github.com/kubernetes-sigs/aws-load-balancer-controller/releases
 [7]: https://github.com/cert-manager/cert-manager/releases
+[8]: https://www.postgresql.org/docs/current/libpq-envars.html
